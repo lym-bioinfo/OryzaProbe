@@ -1,0 +1,101 @@
+---
+title: "Converting rice microarray probe IDs with OryzaProbe"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Converting rice microarray probe IDs with OryzaProbe}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+OryzaProbe converts expression-matrix row names from three rice microarray
+platforms: GPL6864, GPL2025, and GPL8852. Version 0.2.0 preserves the input row
+order and records how each probe was resolved.
+
+```{r}
+library(OryzaProbe)
+supported_platforms()
+```
+
+## Convert and merge probes
+
+The two GPL6864 probes below map to the same RAP-DB gene. Supplying the platform
+explicitly is recommended for reproducible analysis.
+
+```{r}
+expression <- matrix(
+  c(2, 4, 6, 8),
+  nrow = 2,
+  dimnames = list(c("36144", "37310"), c("sample_1", "sample_2"))
+)
+
+converted <- probe_convert(
+  expression,
+  platform = "GPL6864",
+  merge_by = "mean"
+)
+converted
+```
+
+The result is a numeric matrix. The report links every input probe to its
+annotation, resolution policy, and output row.
+
+```{r}
+probe_conversion_report(converted)
+probe_conversion_summary(converted)
+```
+
+## Automatic platform detection
+
+Automatic detection scores every input row. It therefore works for valid
+subsets that do not contain one particular sentinel probe.
+
+```{r}
+subset_expression <- matrix(
+  c(13, 14),
+  ncol = 1,
+  dimnames = list(c("13", "14"), "sample")
+)
+probe_convert(subset_expression)
+```
+
+Detection raises an error if fewer than half of the probe IDs match a supported
+platform or if the result is ambiguous.
+
+## Unmapped, non-RAP, and multi-target annotations
+
+Platform annotations contain controls, miRNA identifiers, probes without a RAP
+target, and a few one-to-many mappings. These are not silently discarded.
+
+The `unmapped` and `non_rap` arguments accept `"keep"`, `"drop"`, or `"error"`.
+The `multi_mapping` argument accepts `"keep"`, `"first"`, `"expand"`, `"drop"`,
+or `"error"`.
+
+```{r}
+multi <- matrix(
+  10,
+  dimnames = list("Os.19863.1.S1_a_at", "sample")
+)
+probe_convert(
+  multi,
+  platform = "GPL2025",
+  multi_mapping = "expand"
+)
+```
+
+## Annotation provenance
+
+The GPL6864 and GPL2025 mappings are the tables published with OryzaProbe 0.1.0.
+They remain identifiable as a legacy snapshot rather than being presented as a
+current RAP-DB release.
+
+```{r}
+probe_annotation_metadata()
+head(probe_annotation("GPL6864"))
+```
+
+The original `probeConvert()` function remains available for existing scripts,
+but new work should use `probe_convert()` so mapping policies are visible.

@@ -1,0 +1,21 @@
+Package: OryzaProbe
+Type: Package
+Title: Convert Rice Microarray Probe IDs to RAP-DB Gene IDs
+Version: 0.2.0
+Authors@R: c(person("Youming", "Liu", role = c("aut", "cre","cph"),
+    email = "lym@g.ecc.u-tokyo.ac.jp") )
+Description: Converts probe identifiers from the rice microarray platforms
+    GPL6864, GPL8852, and GPL2025 to targets from the Rice Annotation Project
+    Database (RAP-DB). Conversion preserves input order, reports unmapped and
+    non-RAP annotations, handles one-to-many mappings explicitly, and can
+    combine multiple probes per target using the mean, maximum, or minimum.
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 3.6)
+RoxygenNote: 7.3.2
+Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/lym-bioinfo/OryzaProbe,
+    https://cran.r-project.org/package=OryzaProbe
+BugReports: https://github.com/lym-bioinfo/OryzaProbe/issues
